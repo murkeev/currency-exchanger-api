@@ -6,7 +6,6 @@ import murkeev.currencyexchangerapi.enums.Status;
 import murkeev.currencyexchangerapi.service.CurrencyServiceImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +60,7 @@ public class CurrencyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@RequestParam Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         currencyService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

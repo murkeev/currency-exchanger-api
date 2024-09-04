@@ -3,6 +3,9 @@ package murkeev.currencyexchangerapi.service;
 import lombok.AllArgsConstructor;
 import murkeev.currencyexchangerapi.enums.Status;
 import murkeev.currencyexchangerapi.entity.Currency;
+import murkeev.currencyexchangerapi.exceptions.CurrencyNotFoundException;
+import murkeev.currencyexchangerapi.exceptions.SaveException;
+import murkeev.currencyexchangerapi.exceptions.UpdateException;
 import murkeev.currencyexchangerapi.repository.CurrencyRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -21,48 +24,73 @@ public class CurrencyServiceImpl {
 
     @Transactional(readOnly = true)
     public List<Currency> findAll() {
-        return currencyRepository.findAll();
+        List<Currency> currencies = currencyRepository.findAll();
+        if (currencies.isEmpty()) {
+            throw new CurrencyNotFoundException("Currencies not found.");
+        }
+        return currencies;
     }
 
     @Transactional(readOnly = true)
     public Currency findById(Long id) {
-        return currencyRepository.findById(id).orElseThrow(() -> new RuntimeException(""));
+        return currencyRepository.findById(id).orElseThrow(() -> new CurrencyNotFoundException("Currencies not found."));
     }
 
     @Transactional(readOnly = true)
     public Currency findByCode(String code) {
-        return currencyRepository.findByCode(code).orElseThrow(() -> new RuntimeException("Currencies not found"));
+        return currencyRepository.findByCode(code).orElseThrow(() -> new CurrencyNotFoundException("Currencies not found."));
     }
 
     @Transactional(readOnly = true)
     public int countAllCurrencies() {
-        return currencyRepository.countAllCurrencies();
+        int count = currencyRepository.countAllCurrencies();
+        if(count < 0) {
+            throw new IllegalArgumentException("count less then 0.");
+        }
+        return count;
     }
 
     @Transactional(readOnly = true)
     public Page<Currency> findByStatus(Status status, int size) {
-        return currencyRepository.findByStatus(status, PageRequest.of(0, size));
+        Page<Currency> currencyPage = currencyRepository.findByStatus(status, PageRequest.of(0, size));
+        if(currencyPage.isEmpty()) {
+            throw new CurrencyNotFoundException("Currencies not found.");
+        }
+        return currencyPage;
     }
 
     @Transactional(readOnly = true)
     public Page<Currency> orderByCodeAsc(int size) {
-        return currencyRepository.orderByCode(PageRequest.of(0, size));
+        Page<Currency> currencyPage = currencyRepository.orderByCode(PageRequest.of(0, size));
+        if(currencyPage.isEmpty()) {
+            throw new CurrencyNotFoundException("Currencies not found.");
+        }
+        return currencyPage;
     }
 
     @Transactional(readOnly = true)
     public Page<Currency> orderByNameAsc(int size) {
-        return currencyRepository.orderByName(PageRequest.of(0, size));
+        Page<Currency> currencyPage = currencyRepository.orderByName(PageRequest.of(0, size));
+        if(currencyPage.isEmpty()) {
+            throw new CurrencyNotFoundException("Currencies not found.");
+        }
+        return currencyPage;
     }
 
     @Transactional
     @Modifying
     public void saveCurrency(Currency currency) {
-        currencyRepository.save(currency);
+        try {
+            currencyRepository.save(currency);
+        } catch (Exception e) {
+            throw new SaveException("Failed in saving currency.");
+        }
     }
 
     @Transactional
     @Modifying
     public void deleteById(Long id) {
+        Currency currency = currencyRepository.findById(id).orElseThrow(() -> new CurrencyNotFoundException("Currency not found."));
         currencyRepository.deleteById(id);
     }
 
@@ -70,8 +98,12 @@ public class CurrencyServiceImpl {
     @Modifying
     public void updateCurrency(Currency updatedCurrency) {
         Currency existingCurrency = currencyRepository.findById(updatedCurrency.getId())
-                .orElseThrow(() -> new RuntimeException("Currency not found."));
+                .orElseThrow(() -> new CurrencyNotFoundException("Currency not found."));
         modelMapper.map(updatedCurrency, existingCurrency);
-        currencyRepository.save(existingCurrency);
+        try {
+            currencyRepository.save(existingCurrency);
+        } catch (Exception e) {
+            throw new UpdateException("Failed in updating currency.");
+        }
     }
 }

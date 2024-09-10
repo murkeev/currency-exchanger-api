@@ -13,6 +13,7 @@ public record CurrencyApiRecord(
         String currencyName,
         double rate,
         String cc,
+        @JsonProperty("exchangedate")
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
         LocalDate exchangeDate) {
 }

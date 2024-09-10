@@ -50,7 +50,7 @@ public class NbuApiService {
         }
     }
 
-    public List<CurrencyApiRecord> getAllCurrencies() throws Exception {
+    public List<CurrencyApiRecord> getAllCurrencies() {
         ResponseEntity<String> response =
                 restClient.get()
                         .uri(NBU_API_URL)

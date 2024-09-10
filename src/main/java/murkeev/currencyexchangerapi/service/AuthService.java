@@ -1,6 +1,7 @@
 package murkeev.currencyexchangerapi.service;
 
 import lombok.AllArgsConstructor;
+import murkeev.currencyexchangerapi.dto.RegistrationUserDto;
 import murkeev.currencyexchangerapi.entity.User;
 import murkeev.currencyexchangerapi.jwt.JwtTokenUtil;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +23,7 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(login);
         return jwtTokenUtil.generateToken(userDetails);
     }
-    public String addUser(User user) {
-        return userService.addUser(user);
+    public void addUser(RegistrationUserDto registrationUserDto) {
+        userService.addUser(registrationUserDto);
     }
 }

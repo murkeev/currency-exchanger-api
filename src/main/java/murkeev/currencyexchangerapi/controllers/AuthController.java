@@ -1,40 +1,29 @@
 package murkeev.currencyexchangerapi.controllers;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import murkeev.currencyexchangerapi.dto.AuthRequestDto;
-import murkeev.currencyexchangerapi.entity.User;
-import murkeev.currencyexchangerapi.jwt.JwtTokenUtil;
+import murkeev.currencyexchangerapi.dto.LoginRequestDto;
+import murkeev.currencyexchangerapi.dto.RegistrationUserDto;
 import murkeev.currencyexchangerapi.service.AuthService;
-import murkeev.currencyexchangerapi.service.UserDetailsServiceImpl;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @AllArgsConstructor
 public class AuthController {
     private final AuthService authService;
 
-    @PostMapping("/addNewUser")
-    public String addNewUser(@RequestBody User user) {
-        return authService.addUser(user);
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(@Valid @RequestBody RegistrationUserDto registrationUserDto) {
+        authService.addUser(registrationUserDto);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PostMapping("/generateToken")
-    public String authenticateAndGetToken(@RequestBody AuthRequestDto authRequestDto) {
-        return authService.authenticateAndGenerateToken(authRequestDto.username(), authRequestDto.password());
-    }
-
-    @GetMapping("/user/userProfile")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    public String userProfile() {
-        return "Welcome to User Profile";
-    }
-
-    @GetMapping("/admin/adminProfile")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String adminProfile() {
-        return "Welcome to Admin Profile";
+    @PostMapping("/login")
+    public ResponseEntity<String> login (@RequestBody LoginRequestDto loginRequest) {
+        String token = authService.authenticateAndGenerateToken(loginRequest.username(), loginRequest.password());
+        return ResponseEntity.ok(token);
     }
 }

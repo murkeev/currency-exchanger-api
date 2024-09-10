@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import murkeev.currencyexchangerapi.enums.Role;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -14,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User {
+public class User /*implements UserDetails*/ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,8 +25,6 @@ public class User {
     @Column(unique = true)
     private String username;
 
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{8,}$",
-            message = "Password must be at least 8 characters long and contain at least one digit")
     private String password;
 
     @Column(name = "first_name")
@@ -36,8 +37,12 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "register_time")
+    private LocalDate date;
+
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @ColumnDefault("'ROLE_USER'")
+    private Role role = Role.ROLE_USER;
 
     @OneToMany(mappedBy = "user")
     private List<HistoryConversation> historyConversations;

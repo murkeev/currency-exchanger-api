@@ -18,7 +18,7 @@ import java.util.function.Function;
 @Component
 public class JwtTokenUtil implements Serializable {
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60L;
+    public static final long JWT_TOKEN_VALIDITY = 10 * 60 * 60 * 1000L;
 
     Key key = Keys.secretKeyFor(SignatureAlgorithm.HS384);
 

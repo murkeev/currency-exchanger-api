@@ -3,6 +3,7 @@ package murkeev.currencyexchangerapi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import murkeev.currencyexchangerapi.dto.CurrencyApiRecord;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +29,15 @@ public class NbuApiService {
                         .toEntity(String.class);
         String responseBody = response.getBody();
 
+        if (responseBody == null) {
+            throw new RuntimeException("Empty response from currency API");
+        }
+
         try {
             double rate = getRate(targetCurrencyCode, responseBody);
             return uah / rate;
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Failed to parse currency data");
+            throw new RuntimeException("Failed to parse currency data: " + e.getMessage(), e);
         }
     }
 
@@ -52,17 +57,16 @@ public class NbuApiService {
     }
 
     private double getRate(String targetCurrencyCode, String responseBody) {
-        JSONObject jsonObject = new JSONObject(responseBody);
-        if (!jsonObject.has("cc") || !jsonObject.has("rate")) {
-            throw new IllegalArgumentException("Response does not contain necessary fields.");
-        }
-        String code = jsonObject.getString("cc");
-        if (!code.equals(targetCurrencyCode)) {
-            throw new IllegalArgumentException("Currency code not found: " + targetCurrencyCode);
-        }
-        double rate = jsonObject.optDouble("rate", -1);
-        if (rate <= 0) {
-            throw new IllegalArgumentException("Invalid rate value: " + rate);
+        JSONArray jsonArray = new JSONArray(responseBody);
+        double rate = 0;
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject currency = jsonArray.getJSONObject(i);
+            if (currency.getString("cc").equalsIgnoreCase(targetCurrencyCode)) {
+                rate = currency.optDouble("rate", -1);
+                if (rate <= 0) {
+                    throw new IllegalArgumentException("Invalid rate value: " + rate);
+                }
+            }
         }
         return rate;
     }

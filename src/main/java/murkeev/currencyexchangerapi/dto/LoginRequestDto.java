@@ -3,7 +3,7 @@ package murkeev.currencyexchangerapi.dto;
 import lombok.Builder;
 
 @Builder
-public record AuthRequestDto(
+public record LoginRequestDto(
         String username,
         String password
 ) {

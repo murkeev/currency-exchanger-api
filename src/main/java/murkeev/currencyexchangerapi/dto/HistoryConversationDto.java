@@ -1,13 +1,12 @@
 package murkeev.currencyexchangerapi.dto;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import lombok.Builder;
 
+@Builder
 public record HistoryConversationDto(
-        BigDecimal baseValue,
-        BigDecimal targetValue,
+        double baseValue,
+        double targetValue,
         String baseCurrencyName,
-        String targetCurrencyName,
-        LocalDateTime date
+        String targetCurrencyName
 ) {
 }

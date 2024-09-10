@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,11 +20,11 @@ public class HistoryConversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "base_currency")
-    private BigDecimal baseValue;
+    @Column(name = "base_value")
+    private double baseValue;
 
-    @Column(name = "target_currency")
-    private BigDecimal targetValue;
+    @Column(name = "target_value")
+    private double targetValue;
 
     @Column(name = "base_currency_name")
     private String baseCurrencyName;
@@ -32,6 +32,7 @@ public class HistoryConversation {
     @Column(name = "target_currency_name")
     private String targetCurrencyName;
 
+    @CreationTimestamp
     private LocalDateTime date;
 
     @ManyToOne

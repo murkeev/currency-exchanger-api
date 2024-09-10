@@ -10,8 +10,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     @Query("SELECT u FROM User u WHERE u.email = :login")
-    Optional<User> checkEmail(String login);
+    Optional<User> findByEmail(String login);
 
     @Query("SELECT u FROM User u WHERE u.username = :login")
-    Optional<User> checkUsername(String login);
+    Optional<User> findByUsername(String login);
 }

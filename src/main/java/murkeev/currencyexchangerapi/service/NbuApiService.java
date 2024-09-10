@@ -3,9 +3,9 @@ package murkeev.currencyexchangerapi.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import murkeev.currencyexchangerapi.dto.CurrencyApiRecord;
+import murkeev.currencyexchangerapi.dto.HistoryConversationDto;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -17,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NbuApiService {
     private final ObjectMapper objectMapper;
+    private final HistoryConversationService historyConversationService;
     private final RestClient restClient;
 
     private static final String NBU_API_URL = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json";
@@ -35,7 +36,15 @@ public class NbuApiService {
 
         try {
             double rate = getRate(targetCurrencyCode, responseBody);
-            return uah / rate;
+            double targetValue = uah / rate;
+            HistoryConversationDto historyDto = HistoryConversationDto.builder()
+                    .baseValue(uah)
+                    .targetValue(targetValue)
+                    .baseCurrencyName("UAH")
+                    .targetCurrencyName(targetCurrencyCode)
+                    .build();
+            historyConversationService.saveConversionHistory(historyDto);
+            return targetValue;
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Failed to parse currency data: " + e.getMessage(), e);
         }

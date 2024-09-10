@@ -2,11 +2,10 @@ package murkeev.currencyexchangerapi.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import murkeev.currencyexchangerapi.enums.Role;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class User /*implements UserDetails*/ {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,6 +36,7 @@ public class User /*implements UserDetails*/ {
     @Column(unique = true)
     private String email;
 
+    @CreationTimestamp
     @Column(name = "register_time")
     private LocalDate date;
 

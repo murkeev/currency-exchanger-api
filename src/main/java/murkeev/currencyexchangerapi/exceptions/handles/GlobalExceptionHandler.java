@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,9 +27,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(EntityNotFoundException e) {
         return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(EntityManipulationException.class)
+    public ResponseEntity<ErrorResponse> handleEntityManipulationException(EntityManipulationException e) {
+        return ResponseEntity.status(500).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(IncorrectLoginOrPasswordException.class)

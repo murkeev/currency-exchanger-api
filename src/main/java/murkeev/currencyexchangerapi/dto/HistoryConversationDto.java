@@ -2,11 +2,12 @@ package murkeev.currencyexchangerapi.dto;
 
 import lombok.Builder;
 
+import java.io.Serializable;
+
 @Builder
-public record HistoryConversationDto(
-        double baseValue,
-        double targetValue,
-        String baseCurrencyName,
-        String targetCurrencyName
-) {
+public class HistoryConversationDto implements Serializable {
+    private double baseValue;
+    private double targetValue;
+    private String baseCurrencyName;
+    private String targetCurrencyName;
 }

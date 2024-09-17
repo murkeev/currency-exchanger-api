@@ -24,6 +24,6 @@ public class AuthService {
         return jwtTokenUtil.generateToken(userDetails);
     }
     public void addUser(RegistrationUserDto registrationUserDto) {
-        userService.addUser(registrationUserDto);
+         userService.addUser(registrationUserDto);
     }
 }

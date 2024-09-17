@@ -27,10 +27,10 @@ public class User {
     private String password;
 
     @Column(name = "first_name")
-    private String firstName;
+    private String firstname;
 
     @Column(name = "last_name")
-    private String lastName;
+    private String lastname;
 
     @Email
     @Column(unique = true)

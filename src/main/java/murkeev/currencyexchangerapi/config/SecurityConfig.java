@@ -55,7 +55,9 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(
                         auth -> auth
-                                .requestMatchers("api/v1/auth/**").permitAll()
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/v3/api-docs/**").permitAll()
                                 .anyRequest().authenticated()
                 ).exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint((request, response, authException) ->
                         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bad URL")))

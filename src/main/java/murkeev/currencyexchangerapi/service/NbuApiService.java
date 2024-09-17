@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import murkeev.currencyexchangerapi.dto.CurrencyApiRecord;
 import murkeev.currencyexchangerapi.dto.HistoryConversationDto;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,11 @@ public class NbuApiService {
                         .toEntity(String.class);
         String responseBody = response.getBody();
 
+        if(response.getStatusCode().isError()) {
+        }
+
         if (responseBody == null) {
-            throw new RuntimeException("Empty response from currency API");
+            throw new JSONException("Empty response from currency API");
         }
 
         try {

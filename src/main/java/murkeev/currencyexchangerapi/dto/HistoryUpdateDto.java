@@ -1,6 +1,9 @@
 package murkeev.currencyexchangerapi.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -9,10 +12,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserHistoryDto implements Serializable {
+public class HistoryUpdateDto implements Serializable {
+    private Long id;
     private double baseValue;
     private double targetValue;
     private String baseCurrencyName;
     private String targetCurrencyName;
-    private LocalDateTime dateTime;
+    private LocalDateTime date;
 }

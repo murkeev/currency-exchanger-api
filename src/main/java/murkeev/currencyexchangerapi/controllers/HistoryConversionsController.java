@@ -28,17 +28,11 @@ public class HistoryConversionsController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/order-date-all")
-    public Page<UserHistoryDto> getAllUsersConversation(@RequestParam(value = "page_number") int pageNumber,
-                                                        @RequestParam(value = "page_size") int pageSize) {
-        return historyConversationService.orderByDate(PageRequest.of(pageNumber, pageSize));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/sorted-target-currency")
-    public Page<UserHistoryDto> orderByCurrencyValue(@RequestParam(value = "page_number") int pageNumber,
+    @GetMapping("/order-by/{value}")
+    public Page<UserHistoryDto> orderByCurrencyValue(@PathVariable String value,
+                                                     @RequestParam(value = "page_number") int pageNumber,
                                                      @RequestParam(value = "page_size") int pageSize) {
-        return historyConversationService.orderByCurrencyValue(PageRequest.of(pageNumber, pageSize));
+        return historyConversationService.orderBy(value, PageRequest.of(pageNumber, pageSize));
     }
 
     @PreAuthorize("hasRole('USER')")

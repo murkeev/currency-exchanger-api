@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -74,7 +75,6 @@ public class UserService {
         return userPage.map(user -> modelMapper.map(user, UserDto.class));
     }
 
-    @Cacheable(cacheNames = "users", key = "#id")
     public UserDto findById(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityManipulationException("User with id " + id + " not found!"));
         return modelMapper.map(user, UserDto.class);
@@ -109,24 +109,6 @@ public class UserService {
         return userPage.map(user -> modelMapper.map(user, UserDto.class));
     }
 
-    @Cacheable(cacheNames = "users", key = "'orderByRegistration:' + #pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<UserDto> orderByRegistration(Pageable pageable) {
-        Page<User> userPage = userRepository.orderByRegistration(pageable);
-        if (userPage.isEmpty()) {
-            throw new EntityNotFoundException("Users not found!");
-        }
-        return userPage.map(user -> modelMapper.map(user, UserDto.class));
-    }
-
-    @Cacheable(cacheNames = "users", key = "'orderByEmail:' + #pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<UserDto> orderByEmail(Pageable pageable) {
-        Page<User> userPage = userRepository.orderByEmail(pageable);
-        if (userPage.isEmpty()) {
-            throw new EntityNotFoundException("Users not found!");
-        }
-        return userPage.map(user -> modelMapper.map(user, UserDto.class));
-    }
-
     public Page<UserDto> findAll(Pageable pageable) {
         Page<User> userPage = userRepository.getAllUsers(pageable);
         if (userPage.isEmpty()) {
@@ -143,13 +125,18 @@ public class UserService {
         return userPage.map(user -> modelMapper.map(user, UserDto.class));
     }
 
-    @Cacheable(cacheNames = "users", key = "'orderByUsername:' + #pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<UserDto> orderByUsername(Pageable pageable) {
-        Page<User> userPage = userRepository.orderByUsername(pageable);
-        if (userPage.isEmpty()) {
-            throw new EntityNotFoundException("Users not found!");
+    @Cacheable(cacheNames = "users", key = "'orderBy:' + #value  + #pageable.pageNumber + '-' + #pageable.pageSize")
+    public Page<UserDto> orderBy(String value, Pageable pageable) {
+        if (!List.of("email", "date", "username").contains(value)) {
+            throw new IllegalArgumentException("Invalid sort value: " + value);
         }
-        return userPage.map(user -> modelMapper.map(user, UserDto.class));
+
+        return switch (value) {
+            case "email" -> userRepository.orderByEmail(pageable).map(user -> modelMapper.map(user, UserDto.class));
+            case "date" -> userRepository.orderByRegistration(pageable).map(user -> modelMapper.map(user, UserDto.class));
+            case "username" -> userRepository.orderByUsername(pageable).map(user -> modelMapper.map(user, UserDto.class));
+            default -> throw new IllegalArgumentException("Unexpected sort value: " + value);
+        };
     }
 
     @CacheEvict(cacheNames = "users", key = "'delete' + #id")
@@ -171,5 +158,11 @@ public class UserService {
         } catch (Exception e) {
             throw new EntityManipulationException("Failed in deleting account.");
         }
+    }
+
+    public UserDto profile() {
+        User user = getCurrentUser();
+        return modelMapper.map(userRepository.findById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found")), UserDto.class);
     }
 }

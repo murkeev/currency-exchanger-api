@@ -1,9 +1,11 @@
 package murkeev.currencyexchangerapi.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.*;
 import murkeev.currencyexchangerapi.enums.Role;
+import murkeev.currencyexchangerapi.util.DateSerializer;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -38,6 +40,7 @@ public class User {
 
     @CreationTimestamp
     @Column(name = "register_time")
+    @JsonSerialize(using = DateSerializer.class)
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)

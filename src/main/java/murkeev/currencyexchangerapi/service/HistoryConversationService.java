@@ -11,12 +11,14 @@ import murkeev.currencyexchangerapi.exceptions.EntityNotFoundException;
 import murkeev.currencyexchangerapi.repository.HistoryConversationRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -30,81 +32,50 @@ public class HistoryConversationService {
 
     public void saveConversionHistory(HistoryConversationDto historyConversationDto) {
         User user = userService.getCurrentUser();
-
         HistoryConversation historyConversation = modelMapper.map(historyConversationDto, HistoryConversation.class);
         historyConversation.setUser(user);
         historyConversationRepository.save(historyConversation);
     }
 
     public Page<UserHistoryDto> getUserConversionHistory(Long userId, Pageable pageable) {
-        String cacheKey = cacheService.createCacheKey("userConversionHistory:", userId + ":" + pageable.toString());
-        Page<UserHistoryDto> cachedHistory = (Page<UserHistoryDto>) cacheService.getValue(cacheKey);
-        if (cachedHistory != null) {
-            return cachedHistory;
-        }
         Page<HistoryConversation> historyConversationPage = historyConversationRepository.findAllConversionsByUserId(userId, pageable);
         if (historyConversationPage.isEmpty()) {
             throw new EntityNotFoundException("No history data!");
         }
-        Page<UserHistoryDto> userHistoryDtoPage = historyConversationPage.map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
-        cacheService.saveValue(cacheKey, userHistoryDtoPage, 45, TimeUnit.MINUTES);
-        return userHistoryDtoPage;
+
+        return historyConversationPage
+                .map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
     }
 
-    public Page<UserHistoryDto> orderByDate(Pageable pageable) {
-        String cacheKey = cacheService.createCacheKey("orderByDate:", pageable.toString());
-        Page<UserHistoryDto> cachedHistory = (Page<UserHistoryDto>) cacheService.getValue(cacheKey);
-        if (cachedHistory != null) {
-            return cachedHistory;
+
+    public Page<UserHistoryDto> orderBy(String value, Pageable pageable) {
+        if (!List.of("date", "currencyValue").contains(value)) {
+            throw new IllegalArgumentException("Invalid sort value: " + value);
         }
 
-        Page<HistoryConversation> historyConversationPage = historyConversationRepository
-                .orderByDate(pageable);
+        Page<HistoryConversation> historyConversationPage = switch (value) {
+            case "date" -> historyConversationRepository.orderByDate(pageable);
+            case "currencyValue" -> historyConversationRepository.orderByCurrencyValue(pageable);
+            default -> throw new IllegalArgumentException("Unexpected sort value: " + value);
+        };
+
         if (historyConversationPage.isEmpty()) {
             throw new EntityNotFoundException("No history data!");
         }
-        Page<UserHistoryDto> userHistoryDtoPage = historyConversationPage.map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
-        cacheService.saveValue(cacheKey, userHistoryDtoPage, 24, TimeUnit.HOURS);
-        return userHistoryDtoPage;
-    }
 
-    public Page<UserHistoryDto> orderByCurrencyValue(Pageable pageable) {
-        String cacheKey = cacheService.createCacheKey("orderByCurrencyValue:", pageable.toString());
-        Page<UserHistoryDto> cachedHistory = (Page<UserHistoryDto>) cacheService.getValue(cacheKey);
-        if (cachedHistory != null) {
-            return cachedHistory;
-        }
-
-        Page<HistoryConversation> historyConversationPage = historyConversationRepository
-                .orderByCurrencyValue(pageable);
-        if (historyConversationPage.isEmpty()) {
-            throw new EntityNotFoundException("No history data!");
-        }
-        Page<UserHistoryDto> userHistoryDtoPage = historyConversationPage.map(
-                historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
-        cacheService.saveValue(cacheKey, userHistoryDtoPage, 1, TimeUnit.HOURS);
-        return userHistoryDtoPage;
+        return historyConversationPage.map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
     }
 
     public Page<UserHistoryDto> getUserHistoryConversation(Pageable pageable) {
         User user = userService.getCurrentUser();
 
-        String cacheKey = cacheService.createCacheKey("userHistoryConversation:", user.getId());
-        Page<UserHistoryDto> cachedHistory = (Page<UserHistoryDto>) cacheService.getValue(cacheKey);
-
-        if (cachedHistory != null) {
-            return cachedHistory;
-        }
-
         Page<HistoryConversation> historyConversationPage = historyConversationRepository
                 .getUserHistoryConversation(user.getId(), pageable);
+
         if (historyConversationPage.isEmpty()) {
             throw new EntityNotFoundException("No history data!");
         }
-
-        Page<UserHistoryDto> userHistoryDtoPage = historyConversationPage.map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
-        cacheService.saveValue(cacheKey, userHistoryDtoPage, 30, TimeUnit.MINUTES);
-        return userHistoryDtoPage;
+        return historyConversationPage.map(historyConversation -> modelMapper.map(historyConversation, UserHistoryDto.class));
     }
 
     public void removeHistory(Long id) {
@@ -135,9 +106,6 @@ public class HistoryConversationService {
         modelMapper.map(updateHistory, existingHistory);
         try {
             historyConversationRepository.save(existingHistory);
-
-            String cacheKey = cacheService.createCacheKey("userHistoryConversation:", existingHistory.getUser().getId());
-            cacheService.saveValue(cacheKey, modelMapper.map(existingHistory, HistoryConversation.class), 12, TimeUnit.HOURS);
         } catch (Exception e) {
             throw new EntityManipulationException("Failed in update history");
         }
@@ -162,22 +130,12 @@ public class HistoryConversationService {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(LocalTime.MAX);
 
-        String cacheKey = cacheService.createCacheKey("userHistoryConversationByDate:", date.toString());
-        Page<UserHistoryDto> cachedHistory = (Page<UserHistoryDto>) cacheService.getValue(cacheKey);
-
-        if (cachedHistory != null) {
-            return cachedHistory;
-        }
-
         Page<HistoryConversation> historyConversations = historyConversationRepository
                 .findAllByDateBetween(start, end, pageable);
         if (historyConversations.isEmpty()) {
             throw new EntityNotFoundException("No history data!");
         }
-        Page<UserHistoryDto> userHistoryDtoPage = historyConversations.map(
+        return historyConversations.map(
                 conversation -> modelMapper.map(conversation, UserHistoryDto.class));
-        cacheService.saveValue(cacheKey, userHistoryDtoPage, 5, TimeUnit.HOURS);
-        return userHistoryDtoPage;
-
     }
 }

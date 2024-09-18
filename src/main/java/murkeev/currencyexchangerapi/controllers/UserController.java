@@ -3,7 +3,6 @@ package murkeev.currencyexchangerapi.controllers;
 import lombok.AllArgsConstructor;
 import murkeev.currencyexchangerapi.dto.UserDto;
 import murkeev.currencyexchangerapi.dto.UserUpdateDto;
-import murkeev.currencyexchangerapi.entity.User;
 import murkeev.currencyexchangerapi.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +40,11 @@ public class UserController {
         return userService.findById(id);
     }
 
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/profile")
+    public UserDto profile() {
+        return userService.profile();
+    }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-firstname")
     public Page<UserDto> getAllByFirstname(@RequestParam String firstname,
@@ -63,32 +67,11 @@ public class UserController {
         return userService.getAllByLastname(lastname, PageRequest.of(pageNumber, pageSize));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/order-registration")
-    public Page<UserDto> orderByRegistration(@RequestParam(value = "page_number") int pageNumber,
-                                             @RequestParam(value = "page_size") int pageSize) {
-        return userService.orderByRegistration(PageRequest.of(pageNumber, pageSize));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/order-email")
-    public Page<UserDto> orderByEmail(@RequestParam(value = "page_number") int pageNumber,
-                                      @RequestParam(value = "page_size") int pageSize) {
-        return userService.orderByEmail(PageRequest.of(pageNumber, pageSize));
-    }
-
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/order-conversation")
     public Page<UserDto> orderByConversation(@RequestParam(value = "page_number") int pageNumber,
                                              @RequestParam(value = "page_size") int pageSize) {
         return userService.orderByConversation(PageRequest.of(pageNumber, pageSize));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/order-username")
-    public Page<UserDto> orderByUsername(@RequestParam(value = "page_number") int pageNumber,
-                                         @RequestParam(value = "page_size") int pageSize) {
-        return userService.orderByUsername(PageRequest.of(pageNumber, pageSize));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -103,5 +86,13 @@ public class UserController {
     public ResponseEntity<Void> deleteAccount() {
         userService.deleteAccount();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/order-by/{value}")
+    public Page<UserDto> orderBy(@PathVariable String value,
+                                 @RequestParam(value = "page_number") int pageNumber,
+                                 @RequestParam(value = "page_size") int pageSize) {
+        return userService.orderBy(value, PageRequest.of(pageNumber, pageSize));
     }
 }

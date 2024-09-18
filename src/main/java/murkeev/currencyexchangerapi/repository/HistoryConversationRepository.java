@@ -23,7 +23,6 @@ public interface HistoryConversationRepository extends JpaRepository<HistoryConv
     @Query("SELECT hc FROM HistoryConversation hc WHERE hc.user.id = :id")
     Page<HistoryConversation> getUserHistoryConversation(Long id, Pageable pageable);
 
-
     @Query("SELECT hc FROM HistoryConversation hc WHERE hc.date BETWEEN :startOfDay AND :endOfDay")
     Page<HistoryConversation> findAllByDateBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable);
 }

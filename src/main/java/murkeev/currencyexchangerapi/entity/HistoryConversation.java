@@ -1,10 +1,13 @@
 package murkeev.currencyexchangerapi.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import murkeev.currencyexchangerapi.util.DateTimeSerializer;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -33,6 +36,7 @@ public class HistoryConversation {
     private String targetCurrencyName;
 
     @CreationTimestamp
+    @JsonSerialize(using = DateTimeSerializer.class)
     private LocalDateTime date;
 
     @ManyToOne

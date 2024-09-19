@@ -18,7 +18,7 @@ public class AuthService {
     private final UserDetailsServiceImpl userDetailsService;
 
     public String authenticateAndGenerateToken(String login, String password) {
-        User user = userService.checkEmailOrUsername(login);
+        userService.checkEmailOrUsername(login);
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(login, password));
         UserDetails userDetails = userDetailsService.loadUserByUsername(login);
         return jwtTokenUtil.generateToken(userDetails);

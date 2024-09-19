@@ -12,19 +12,9 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CurrencyNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleCurrencyNotFoundException(CurrencyNotFoundException e) {
+    @ExceptionHandler(CurrencyException.class)
+    public ResponseEntity<ErrorResponse> handleCurrencyNotFoundException(CurrencyException e) {
         return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
-    }
-
-    @ExceptionHandler(SaveException.class)
-    public ResponseEntity<ErrorResponse> handleSaveException(SaveException e) {
-        return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
-    }
-
-    @ExceptionHandler(UpdateException.class)
-    public ResponseEntity<ErrorResponse> handleUpdateException(UpdateException e) {
-        return ResponseEntity.status(401).body(new ErrorResponse(e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

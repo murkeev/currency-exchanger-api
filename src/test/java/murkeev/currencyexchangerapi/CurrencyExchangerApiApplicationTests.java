@@ -8,6 +8,7 @@ class CurrencyExchangerApiApplicationTests {
 
     @Test
     void contextLoads() {
+        // why this method is empty?:>
     }
 
 }

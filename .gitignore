@@ -35,4 +35,3 @@ build/
 mvnw
 mvnw.cmd
 task.txt
-src/main/resources/application.properties

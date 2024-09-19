@@ -1,5 +1,6 @@
 package murkeev.currencyexchangerapi.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import murkeev.currencyexchangerapi.dto.CurrencyApiRecord;
 import murkeev.currencyexchangerapi.service.NbuApiService;
@@ -17,11 +18,13 @@ import java.util.List;
 public class CurrencyExchangeController {
     private final NbuApiService nbuApiService;
 
+    @Operation(summary = "Convert UAH to a target currency")
     @GetMapping("/convert")
     public ResponseEntity<Double> convert(@RequestParam double uah, @RequestParam String targetCurrencyCode) {
         return ResponseEntity.ok(nbuApiService.convertToTargetCurrency(uah, targetCurrencyCode));
     }
 
+    @Operation(summary = "Get all currencies and exchange rates")
     @GetMapping("/all")
     public List<CurrencyApiRecord> getAllCurrencies() {
         return nbuApiService.getAllCurrencies();

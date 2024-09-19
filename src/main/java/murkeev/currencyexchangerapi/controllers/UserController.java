@@ -1,5 +1,6 @@
 package murkeev.currencyexchangerapi.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AllArgsConstructor;
 import murkeev.currencyexchangerapi.dto.UserDto;
 import murkeev.currencyexchangerapi.dto.UserUpdateDto;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 public class UserController {
     private final UserService userService;
 
+    @Operation(summary = "Get all users", description = "Returns a paginated list of all users.")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public Page<UserDto> getAll(@RequestParam(value = "page_number") int pageNumber,
@@ -26,6 +28,7 @@ public class UserController {
         return userService.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
+    @Operation(summary = "Get users by registration date")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/find-register")
     public Page<UserDto> getAllByRegistrationDate(@RequestParam LocalDate date,
@@ -40,11 +43,13 @@ public class UserController {
         return userService.findById(id);
     }
 
+    @Operation(summary = "Get current user's profile (only for ROLE_USER)")
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/profile")
     public UserDto profile() {
         return userService.profile();
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get-firstname")
     public Page<UserDto> getAllByFirstname(@RequestParam String firstname,
@@ -67,12 +72,14 @@ public class UserController {
         return userService.getAllByLastname(lastname, PageRequest.of(pageNumber, pageSize));
     }
 
+    @Operation(summary = "Order users by conversation count")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/order-conversation")
     public Page<UserDto> orderByConversation(@RequestParam(value = "page_number") int pageNumber,
                                              @RequestParam(value = "page_size") int pageSize) {
         return userService.orderByConversation(PageRequest.of(pageNumber, pageSize));
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
@@ -81,13 +88,16 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @Operation(summary = "Delete current user's account",
+            description = "Deletes the account of the currently authenticated user.")
     @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/delete-account")
     public ResponseEntity<Void> deleteAccount() {
         userService.deleteAccount();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
+    @Operation(summary = "Order users by specified value",
+            description = "Orders users by a specified value (e.g., username, email or date), with pagination.")
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/order-by/{value}")
     public Page<UserDto> orderBy(@PathVariable String value,

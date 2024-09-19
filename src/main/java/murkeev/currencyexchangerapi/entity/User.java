@@ -49,12 +49,4 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<HistoryConversation> historyConversations;
-
-    public int getCountOfConversations() {
-        if (historyConversations != null) {
-            return historyConversations.size();
-        } else {
-            return 0;
-        }
-    }
 }
